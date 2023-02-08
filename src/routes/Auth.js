@@ -1,77 +1,117 @@
-import React, { useState } from "react"
-// import { getAuth } from "firebase/auth";
-import {getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup} from "firebase/auth"
+import React, { useState } from "react";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider
+    } from 'firebase/auth';
+
+    import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+    import {
+      faGoogle,
+      faTwitter,
+      faFacebook
+    } from "@fortawesome/free-brands-svg-icons";
 
 const Auth = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [newAccount, setNewAccount] = useState(true);
-
-    const onEmailChange = (event) => {
-        const {value} = event.target
-        setEmail(value)
-    }
-
-    const onPasswordChange = (event) => {
-        console.log(event)
-        const {value} = event.target
-        setPassword(value)
-    }
+    const [error, setError] = useState("")
     
-    const toggleAccount = () => setNewAccount((prev) => !prev)
+    const onChange = (event) => {
+        const {target: {name, value}} = event
+        // const {name, value} = event.target
+        
+        if(name === "email") {
+            setEmail(value)
+        } else if(name === "password") {
+            setPassword(value)
+        }
+    }
 
-    const onSubmit = async(event) => {
-        event.preventDefault(); // submit 버튼 클릭시 새로고침 방치
-        console.log(event.target.value)
+    const onSubmit = async (event) => {
+        event.preventDefault(); // submit()은 클릭과 동시에 새로고침됨.
         
         const auth = getAuth();
+
         let data;
-        
-        if (newAccount) {
-            data = await createUserWithEmailAndPassword(auth, email, password)
+        if(newAccount) {
+            data = await createUserWithEmailAndPassword(auth, email,password)
         } else {
             data = await signInWithEmailAndPassword(auth, email, password)
         }
     }
 
+    const toggleAccount = () => setNewAccount((prev) => !prev)
+
+    // https://firebase.google.com/docs/auth?hl=ko
     const onSocialClick = async (event) => {
-        console.log(event)
-
-        const { name } = event.target
-        console.log(name)
-
+        const {target: {name}} = event
         const auth = getAuth();
-        const provider = new GoogleAuthProvider();
+
+        let provider;
+        if(name==="google"){
+            provider = new GoogleAuthProvider()
+        }
+
         const data = await signInWithPopup(auth, provider)
         console.log(data)
     }
-
+    
     return (
-    <div>
-        <form onSubmit={onSubmit}>
-            <input
-                name="email"
-                type="email"
-                placeholder="input email"
-                value={email}
-                onChange={onEmailChange}
-                required
-            />
-            <input name="password" type="password" placeholder="input password" value={password}
-            onChange={onPasswordChange}
-            required></input>
-                <input type="submit" value={newAccount ? "Create Account" : "sign in"}></input>
-                
-            <span onClick={toggleAccount}>
-                {newAccount ? "sign in" : "Create Account"}
-            </span>
-        </form>
-        
-        <button onClick={onSocialClick} name="google">Google Login</button>
-        <button onClick={onSocialClick} name="github">Github Login</button>
-        <button onClick={onSocialClick} name="facebook">Facebook Login</button>
-    </div> 
-    )
-}
+      <div className="authContainer">
+        <FontAwesomeIcon
+          icon={faTwitter}
+          color={"#04AAFF"}
+          size="4x"
+          style={{marginBottom:"20px"}}
+          />
+        <form onSubmit={onSubmit} className="container">
+          <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          className="authInput"
+          onChange={onChange}
+        />
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          className="authInput"          
+          onChange={onChange}
+        />
+        <input
+          type="submit"
+          className="authInput authSubmit"
+          value={newAccount ? "Create Account" : "Sign In"}
+        />
+        {error}
+      </form>
+      <span onClick={toggleAccount} style={{marginBottom: "20px"}}>
+        {newAccount ? "Sign In" : "Create Account"}
+      </span>
+      <div className="authBtns">
+        <button className="authBtn" onClick={onSocialClick} name="google">
+          Continue with Google
+          <FontAwesomeIcon icon={faGoogle} 
+          style={{marginLeft:"3px"}}/>
+        </button>
 
+        <button className="authBtn" onClick={onSocialClick} name="facebook">
+          Continue with Facebook
+          <FontAwesomeIcon icon={faFacebook} 
+          style={{marginLeft:"3px"}}/>          
+        </button>
+      </div>
+    </div>
+    )
+
+}
 export default Auth;

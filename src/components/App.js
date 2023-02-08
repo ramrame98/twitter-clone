@@ -1,35 +1,28 @@
-import AppRouter from "./Router";
-import React, { useState, useEffect } from "react"
-import { auth } from "../fbase";
+import React, { useState, useEffect } from "react";
+import AppRouter from "components/Router";
+import { auth } from "fbase";
 
 function App() {
   const [init, setInit] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userObj, setUserObj] = useState(null);
 
-
-  const initializeUser = () => {
+  useEffect(() => {
+    // https://firebase.google.com/docs/auth/web/manage-users?hl=ko
     auth.onAuthStateChanged((user) => {
-      console.log("user")
-      console.log(user)
-
       if (user) {
         setIsLoggedIn(true);
         setUserObj(user)
       } else {
-        setIsLoggedIn(false)
+        setIsLoggedIn(false);
       }
-      setInit(true)
-    })
-  }
-
-  useEffect(() => {
-    initializeUser()
-  }, [])
-
+      setInit(true);
+    });
+  }, []);
   return (
     <>
       {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj}/> : "Initializing..."}
+      <footer>&copy; {new Date().getFullYear()} Twitter</footer>
     </>
   );
 }
